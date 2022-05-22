@@ -1,27 +1,35 @@
 const fs = require('fs');
+const path = require('path');
 
 fs.readdir(__dirname, (err) => {
   // если есть ошибка, выбрасываем ошибку
   if (err) throw err;
 
   // переменные где хранятся пути до изначальных папок и до скопированной папки
-  const pathToOriginalDir = `${__dirname}\\files`;
-  const pathToCopiedDir = `${__dirname}\\files-copy`;
+  const pathToOriginalDir = path.resolve(__dirname, 'files');
+  const pathToCopiedDir = path.resolve(__dirname, 'files-copy');
 
-  // создаю папку по пути dirname/название папки
-  fs.mkdir(pathToCopiedDir, () => console.log(`Путь до скопированной папки: ${pathToCopiedDir}`));
+  fs.rm(pathToCopiedDir, { recursive: true, force: true }, (err) => {
+    if (err) console.log(err);
 
-  fs.readdir(pathToOriginalDir, (err, files) => {
-    // если есть ошибка, выбрасываем ошибку
-    if (err) throw err;
+    fs.mkdir(pathToCopiedDir, { recursive: true }, (err) => {
+      if (err) console.log(err);
+    });
 
-    files.forEach((elem) => {
-      // путь до изначального элементка и до скопированного
-      const pathToOldFile = `${pathToOriginalDir}\\${elem}`;
-      const pathToNewFile = `${pathToCopiedDir}\\${elem}`;
+    fs.readdir(pathToOriginalDir, (err, files) => {
+      // если есть ошибка, выбрасываем ошибку
+      if (err) throw err;
 
-      // копипую файлы
-      fs.copyFile(pathToOldFile, pathToNewFile, () => console.log(`Файл ${elem} успешно скопированы`));
+      files.forEach((elem) => {
+        // путь до изначального элементка и до скопированного
+        const pathToOldFile = path.resolve(pathToOriginalDir, elem);
+        const pathToNewFile = path.resolve(pathToCopiedDir, elem);
+
+        // копипую файлы
+        fs.copyFile(pathToOldFile, pathToNewFile, (err) => {
+          if (err) throw Error;
+        });
+      });
     });
   });
 });
